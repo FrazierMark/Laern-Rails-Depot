@@ -40,8 +40,7 @@ class ProductsController < ApplicationController
       else
         format.html { render :new,
           status: :unprocessable_entity }
-        format.json { render json: @product.errors,
-          status: :unprocessable_entity }
+        format.json { render json: @product.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -56,8 +55,7 @@ class ProductsController < ApplicationController
       else
         format.html { render :edit,
           status: :unprocessable_entity }
-        format.json { render json: @product.errors,
-          status: :unprocessable_entity }
+        format.json { render json: @product.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -81,7 +79,6 @@ class ProductsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def product_params
-      params.require(:product).
-        permit(:title, :description, :image_url, :price)
+      params.require(:product).permit(:title, :description, :image_url, :price)
     end
 end
