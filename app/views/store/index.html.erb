@@ -11,6 +11,7 @@
 </h1>
 
 <ul>
+  <%# Whenever the data changes in our cache, section will be rerendered %>
   <% cache @products do %>
     <% @products.each do |product| %>
       <% cache product do %>
