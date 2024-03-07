@@ -26,9 +26,21 @@ class LineItemsController < ApplicationController
     product = Product.find(params[:product_id])
     @line_item = @cart.add_product(product)
 
+    #Respond_to defines different responses depending on the format of the request
     respond_to do |format|
+
+      # This block renders a Turbo Stream response that replaces the :cart element
+      # on the page with the rendered layouts/cart partial,
+      # passing in @cart as a local variable.
       if @line_item.save
-        format.html { redirect_to cart_url(@line_item.cart) }
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            :cart,
+            partial: "layouts/cart",
+            locals: {cart: @cart}
+          )
+        end
+        format.html { redirect_to store_index_url }
         format.json { render :show,
           status: :created, location: @line_item }
       else
