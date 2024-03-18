@@ -28,7 +28,9 @@ class LineItemsController < ApplicationController
 
     respond_to do |format|
       if @line_item.save
-        format.turbo_stream
+        # if the response is a turbo_stream, we redirect to the store index
+        # (store index) renders the cart partials
+        format.turbo_stream {@current_item = @line_item}
         format.html { redirect_to store_index_url }
         format.json { render :show,
           status: :created, location: @line_item }
