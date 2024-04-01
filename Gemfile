@@ -68,3 +68,8 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+
+#START:as_xml
+gem 'activemodel-serializers-xml'
+#END:as_xml
