@@ -1,4 +1,12 @@
-require "test_helper"
+#---
+# Excerpted from "Agile Web Development with Rails 7",
+# published by The Pragmatic Bookshelf.
+# Copyrights apply to this code. It may not be used to create training material,
+# courses, books, articles, and the like. Contact us if you are in doubt.
+# We make no guarantees that this code is fit for any purpose.
+# Visit https://pragprog.com/titles/rails7 for more book information.
+#---
+require 'test_helper'
 
 class OrderMailerTest < ActionMailer::TestCase
   test "received" do
@@ -14,11 +22,8 @@ class OrderMailerTest < ActionMailer::TestCase
     assert_equal "Pragmatic Store Order Shipped", mail.subject
     assert_equal ["dave@example.org"], mail.to
     assert_equal ["depot@example.com"], mail.from
-    assert_match %r(
-      <td[^>]*>1<\/td>\s*
-      <td>&times;<\/td>\s*
-      <td[^>]*>\s*Programming\sRuby\s1.9\s*</td>
-    )x, mail.body.to_s
+    assert_match /<td[^>]*>1<\/td>\s*<td>Programming Ruby 1.9<\/td>/,
+      mail.body.encoded
   end
 
 end

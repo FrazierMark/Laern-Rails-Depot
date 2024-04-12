@@ -7,6 +7,6 @@
 # Visit https://pragprog.com/titles/rails7 for more book information.
 #---
 class ApplicationMailer < ActionMailer::Base
-  default from: "from@example.com"
-  layout "mailer"
+  default from: 'from@example.com'
+  layout 'mailer'
 end

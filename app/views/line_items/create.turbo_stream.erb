@@ -1,9 +1,0 @@
-# generally a turbo_stream template is recommended whenever 
-# multiple items are in the response
-
-<%= turbo_stream.replace 'notice' do %>  
-  <%= render partial: 'store/notice', locals: { notice: @notice } %>  
-<% end %>    
-<%= turbo_stream.replace 'cart' do %>  
-  <%= render partial: 'layouts/cart', locals: { cart: @cart } %>  
-<% end %>

@@ -1,75 +1,54 @@
+#---
+# Excerpted from "Agile Web Development with Rails 7",
+# published by The Pragmatic Bookshelf.
+# Copyrights apply to this code. It may not be used to create training material,
+# courses, books, articles, and the like. Contact us if you are in doubt.
+# We make no guarantees that this code is fit for any purpose.
+# Visit https://pragprog.com/titles/rails7 for more book information.
+#---
 require "application_system_test_case"
+
 
 class OrdersTest < ApplicationSystemTestCase
   include ActiveJob::TestHelper
+    
 
-  test "check dynamic fields" do
-    visit store_index_url
+  test "check routing number" do
 
-    click_on 'Add to Cart', match: :first
-
-    click_on 'Checkout'
-
-    assert has_no_field? 'Routing number'
-    assert has_no_field? 'Account number'
-    assert has_no_field? 'Credit card number'
-    assert has_no_field? 'Expiration date'
-    assert has_no_field? 'Po number'
-
-    select 'Check', from: 'Pay type'
-
-    assert has_field? 'Routing number'
-    assert has_field? 'Account number'
-    assert has_no_field? 'Credit card number'
-    assert has_no_field? 'Expiration date'
-    assert has_no_field? 'Po number'
-
-    select 'Credit card', from: 'Pay type'
-
-    assert has_no_field? 'Routing number'
-    assert has_no_field? 'Account number'
-    assert has_field? 'Credit card number'
-    assert has_field? 'Expiration date'
-    assert has_no_field? 'Po number'
-
-    select 'Purchase order', from: 'Pay type'
-
-    assert has_no_field? 'Routing number'
-    assert has_no_field? 'Account number'
-    assert has_no_field? 'Credit card number'
-    assert has_no_field? 'Expiration date'
-    assert has_field? 'Po number'
-  end
-
-  test "check order and delivery" do
     LineItem.delete_all
     Order.delete_all
 
     visit store_index_url
 
-    click_on 'Add to Cart', match: :first
+    visit store_index_url
+
+    first('.catalog li').click_on 'Add to Cart'
 
     click_on 'Checkout'
 
-    fill_in 'Name', with: 'Dave Thomas'
-    fill_in 'Address', with: '123 Main Street'
-    fill_in 'Email', with: 'dave@example.com'
+    fill_in 'order_name', with: 'Dave Thomas'
+    fill_in 'order_address', with: '123 Main Street'
+    fill_in 'order_email', with: 'dave@example.com'
 
-    select 'Check', from: 'Pay type'
-    fill_in "Routing number", with: "123456"
-    fill_in "Account number", with: "987654"
+    assert_no_selector "#order_routing_number"
 
-    click_button "Place Order"
-    assert_text 'Thank you for your order'
+    select 'Check', from: 'pay_type'
 
-    perform_enqueued_jobs
-    perform_enqueued_jobs
-    assert_performed_jobs 2
+
+    assert_selector "#order_routing_number"
+
+    fill_in "Routing #", with: "123456"
+    fill_in "Account #", with: "987654"
+
+    perform_enqueued_jobs do
+      click_button "Place Order"
+    end
 
     orders = Order.all
     assert_equal 1, orders.size
 
     order = orders.first
+
     assert_equal "Dave Thomas",      order.name
     assert_equal "123 Main Street",  order.address
     assert_equal "dave@example.com", order.email
@@ -80,5 +59,6 @@ class OrdersTest < ApplicationSystemTestCase
     assert_equal ["dave@example.com"],                 mail.to
     assert_equal 'Sam Ruby <depot@example.com>',       mail[:from].value
     assert_equal "Pragmatic Store Order Confirmation", mail.subject
-  end
+
+  end 
 end

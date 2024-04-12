@@ -7,4 +7,9 @@
 # Visit https://pragprog.com/titles/rails7 for more book information.
 #---
 module ApplicationHelper
+  def render_if(condition, record)
+    if condition
+      render record
+    end
+  end
 end

@@ -1,17 +1,25 @@
+#---
+# Excerpted from "Agile Web Development with Rails 7",
+# published by The Pragmatic Bookshelf.
+# Copyrights apply to this code. It may not be used to create training material,
+# courses, books, articles, and the like. Contact us if you are in doubt.
+# We make no guarantees that this code is fit for any purpose.
+# Visit https://pragprog.com/titles/rails7 for more book information.
+#---
 require 'active_model/serializers/xml'
 require 'pago'
 
 class Order < ApplicationRecord
   include ActiveModel::Serializers::Xml
   enum pay_type: {
-    "Check"          => 0,
-    "Credit card"    => 1,
+    "Check"          => 0, 
+    "Credit card"    => 1, 
     "Purchase order" => 2
   }
   has_many :line_items, dependent: :destroy
+  # ...
   validates :name, :address, :email, presence: true
   validates :pay_type, inclusion: pay_types.keys
-
   def add_line_items_from_cart(cart)
     cart.line_items.each do |item|
       item.cart_id = nil
@@ -19,9 +27,6 @@ class Order < ApplicationRecord
     end
   end
 
-  # first, adapt pay_type_params to the format expected by Pago.make_payment
-  # then, call Pago.make_payment to make payment
-  # if payment is successful, send an email to the customer
   def charge!(pay_type_params)
     payment_details = {}
     payment_method = nil

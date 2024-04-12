@@ -1,13 +1,25 @@
-
+#---
+# Excerpted from "Agile Web Development with Rails 7",
+# published by The Pragmatic Bookshelf.
+# Copyrights apply to this code. It may not be used to create training material,
+# courses, books, articles, and the like. Contact us if you are in doubt.
+# We make no guarantees that this code is fit for any purpose.
+# Visit https://pragprog.com/titles/rails7 for more book information.
+#---
 class ProductsController < ApplicationController
-  before_action :set_product, only: %i[ show edit update destroy ]
+  before_action :set_product, only: [:show, :edit, :update, :destroy]
 
-  # GET /products or /products.json
+  # GET /products
+  # GET /products.json
   def index
-    @products = Product.all
+    @products = Product.all.order(:title)
+    respond_to do |format|
+      format.html
+    end
   end
 
-  # GET /products/1 or /products/1.json
+  # GET /products/1
+  # GET /products/1.json
   def show
   end
 
@@ -20,54 +32,66 @@ class ProductsController < ApplicationController
   def edit
   end
 
-  # POST /products or /products.json
+  # POST /products
+  # POST /products.json
   def create
     @product = Product.new(product_params)
 
     respond_to do |format|
       if @product.save
-        format.html { redirect_to product_url(@product),
-          notice: "Product was successfully created." }
+        format.html { redirect_to @product,
+          notice: 'Product was successfully created.' }
         format.json { render :show, status: :created,
           location: @product }
       else
-        format.html { render :new,
-          status: :unprocessable_entity }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # PATCH/PUT /products/1 or /products/1.json
-  def update
-    respond_to do |format|
-      if @product.update(product_params)
-        format.html { redirect_to product_url(@product),
-          notice: "Product was successfully updated." }
-        format.json { render :show, status: :ok, location: @product }
-
-        # Broadcast the update to the product channel
-        # to update the product list in real time
-        # asynchronously
-        @product.broadcast_replace_later_to 'products',
-          partial: 'store/product'
-      else
-        format.html { render :edit,
-          status: :unprocessable_entity }
+        format.html { render :new }
         format.json { render json: @product.errors,
           status: :unprocessable_entity }
       end
     end
   end
 
-  # DELETE /products/1 or /products/1.json
+  # PATCH/PUT /products/1
+  # PATCH/PUT /products/1.json
+  def update
+    respond_to do |format|
+      if @product.update(product_params)
+        format.html { redirect_to @product,
+          notice: 'Product was successfully updated.' }
+        format.json { render :show, status: :ok, location: @product }
+
+        @products = Product.all.order(:title)
+        ActionCable.server.broadcast 'products',
+          html: render_to_string('store/index', layout: false)
+      else
+        format.html { render :edit }
+        format.json { render json: @product.errors,
+          status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /products/1
+  # DELETE /products/1.json
   def destroy
     @product.destroy
-
     respond_to do |format|
       format.html { redirect_to products_url,
-          notice: "Product was successfully destroyed." }
+          notice: 'Product was successfully destroyed.' }
       format.json { head :no_content }
+    end
+  end
+
+  def who_bought
+    @product = Product.find(params[:id])
+    @latest_order = @product.orders.order(:updated_at).last
+    if stale?(@latest_order)
+      respond_to do |format|
+        format.html
+        format.xml
+        format.atom
+        format.json { render json: @product.to_json(include: :orders) }
+      end
     end
   end
 
@@ -77,7 +101,8 @@ class ProductsController < ApplicationController
       @product = Product.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
+    # Never trust parameters from the scary internet, only allow the white
+    # list through.
     def product_params
       params.require(:product).permit(:title, :description, :image_url, :price)
     end
